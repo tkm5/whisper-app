@@ -1,0 +1,13 @@
+#setting files
+.DS_Store
+.idea/
+.tmp.driveupload
+
+#audio files
+audio/
+*.m4a
+*.wav
+*.mp3
+
+#text files
+*.txt
