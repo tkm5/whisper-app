@@ -12,14 +12,14 @@
 # Windows
 # chco install ffmpeg
 # ========================================================
-# %%
+
 import whisper
 
 LANG = "ja"
 AUDIO_FILE = "xxxxxxxxxxxxxxxxx.m4a"
 # OUTPUT_FILE_NAME = "output2.txt"
 OUTPUT_FILE_NAME = AUDIO_FILE.split(".")[0] + ".txt"
-# %%
+
 
 def elapsed_time_str(seconds):
     seconds = int(seconds + 0.5)
