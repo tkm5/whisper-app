@@ -17,7 +17,7 @@ import whisper
 
 LANG = "ja"
 AUDIO_FILE = "xxxxxxxxxxxxxxxxx.m4a"
-# OUTPUT_FILE_NAME = "output2.txt"
+# OUTPUT_FILE_NAME = "output.txt"
 OUTPUT_FILE_NAME = AUDIO_FILE.split(".")[0] + ".txt"
 
 
