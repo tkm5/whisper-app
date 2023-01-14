@@ -12,14 +12,14 @@
 # Windows
 # chco install ffmpeg
 # ========================================================
-
+# %%
 import whisper
 
 LANG = "ja"
 AUDIO_FILE = "xxxxxxxxxxxxxxxxx.m4a"
 # OUTPUT_FILE_NAME = "output2.txt"
 OUTPUT_FILE_NAME = AUDIO_FILE.split(".")[0] + ".txt"
-
+# %%
 
 def elapsed_time_str(seconds):
     seconds = int(seconds + 0.5)
@@ -39,7 +39,7 @@ def audio_to_text(model):
     return result_dict
 
 
-def generate_start_time_and_time_text(result):
+def generate_start_time_end_time_text(result):
 
     start_times_list = []
     end_times_list = []
@@ -57,7 +57,7 @@ def generate_start_time_and_time_text(result):
 
 
 results = audio_to_text(model="large")
-start_times, end_times, texts = generate_start_time_and_time_text(results['segments'])
+start_times, end_times, texts = generate_start_time_end_time_text(results['segments'])
 
 start_times = list(map(elapsed_time_str, start_times))
 end_times = list(map(elapsed_time_str, end_times))
