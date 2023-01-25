@@ -15,8 +15,10 @@
 
 import whisper
 
+import slack_notification
+
 LANG = "ja"
-AUDIO_FILE = "xxxxxxxxxxxxxxxxx.m4a"
+AUDIO_FILE = "20230125_定例.m4a"
 # OUTPUT_FILE_NAME = "output.txt"
 OUTPUT_FILE_NAME = AUDIO_FILE.split(".")[0] + ".txt"
 
@@ -56,12 +58,18 @@ def generate_start_time_end_time_text(result):
     return start_times_list, end_times_list, texts_list
 
 
+def write_to_text(file_name=OUTPUT_FILE_NAME):
+    with open(OUTPUT_FILE_NAME, "w") as f:
+        for i in range(len(texts)):
+            print(f'[{start_times[i]}] --> [{end_times[i]}] | {texts[i]}', file=f)
+
+
 results = audio_to_text(model="large")
 start_times, end_times, texts = generate_start_time_end_time_text(results['segments'])
 
 start_times = list(map(elapsed_time_str, start_times))
 end_times = list(map(elapsed_time_str, end_times))
 
-with open(OUTPUT_FILE_NAME, "w") as f:
-    for i in range(len(texts)):
-        print(f'[{start_times[i]}] --> [{end_times[i]}] | {texts[i]}', file=f)
+write_to_text()
+
+slack_notification.slack_dm()
