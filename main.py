@@ -1,26 +1,12 @@
-# === install list =======================================
-
-# pip install git+https://github.com/openai/whisper.git
-# pip install jiwer
-
-# Linux
-# sudo apt update && sudo apt install ffmpeg
-
-# MacOS
-# brew install ffmpeg
-
-# Windows
-# chco install ffmpeg
-# ========================================================
-
 import whisper
+import pandas as pd
 
 import slack_notification
 
 LANG = "ja"
-AUDIO_FILE = "20230125_定例.m4a"
-# OUTPUT_FILE_NAME = "output.txt"
-OUTPUT_FILE_NAME = AUDIO_FILE.split(".")[0] + ".txt"
+AUDIO_FILE = "test.m4a"
+# Do not need file extension
+OUTPUT_FILE_NAME = AUDIO_FILE.split(".")[0]
 
 
 def elapsed_time_str(seconds):
@@ -59,9 +45,17 @@ def generate_start_time_end_time_text(result):
 
 
 def write_to_text(file_name=OUTPUT_FILE_NAME):
-    with open(OUTPUT_FILE_NAME, "w") as f:
+    with open(OUTPUT_FILE_NAME + ".txt", "w") as f:
         for i in range(len(texts)):
             print(f'[{start_times[i]}] --> [{end_times[i]}] | {texts[i]}', file=f)
+
+
+def export_csv(output_file_name=OUTPUT_FILE_NAME):
+    df = pd.DataFrame(data={'start_time': start_times,
+                            'end_time': end_times,
+                            'speach_text': texts}
+                      )
+    df.to_csv(OUTPUT_FILE_NAME + ".csv")
 
 
 results = audio_to_text(model="large")
@@ -71,5 +65,5 @@ start_times = list(map(elapsed_time_str, start_times))
 end_times = list(map(elapsed_time_str, end_times))
 
 write_to_text()
-
+export_csv()
 slack_notification.slack_dm()
