@@ -3,6 +3,7 @@
 .idea/
 .tmp.driveupload
 *.json
+secret.py
 
 #audio files
 audio/
