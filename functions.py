@@ -30,9 +30,7 @@ def audio_to_text(model):
 
     minutes_dict = _generate_minutes_dict(result_dict['segments'])
 
-    # minutes_dict['start_time'] = list(map(elapsed_time_str, minutes_dict['start_time']))
     minutes_dict['start_time'] = [elapsed_time_str(t) for t in minutes_dict['start_time']]
-    # minutes_dict['end_time'] = list(map(elapsed_time_str, minutes_dict['end_time']))
     minutes_dict['end_time'] = [elapsed_time_str(t) for t in minutes_dict['end_time']]
 
     return minutes_dict
