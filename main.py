@@ -1,6 +1,7 @@
 import os
 
 import functions
+import discord_notification
 import settings
 
 OUTPUT_FILE_NAME = settings.OUTPUT_FILE_NAME
@@ -15,3 +16,4 @@ if __name__ == '__main__':
     minutes_dict = functions.audio_to_text(model='large')
     functions.write_to_text(TEXT_PATH, minutes_dict)
     functions.export_csv(CSV_PATH, minutes_dict)
+    discord_notification.post_notice(message=f'{OUTPUT_FILE_NAME} minutes is DONE!')
