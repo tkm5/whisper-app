@@ -21,7 +21,6 @@ It outputs the minutes in the following two formats.
     [00:00:00] --> [00:00:02] | We're all here.
     [00:00:02] --> [00:00:08] | Today we discuss Whisper.
     [00:00:08] --> [00:00:15] | Let's discuss the model.
-    [00:00:08] --> [00:00:15] | Let's discuss the model.
     [00:00:15] --> [00:00:33] | Large model will be the best system.
     [00:00:33] --> [00:00:43] | But the capacity is large.
     ```
