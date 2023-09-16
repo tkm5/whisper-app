@@ -14,3 +14,7 @@ audio/
 #text files
 *.txt
 *.csv
+
+#misc
+__pycache__/
+venv/
