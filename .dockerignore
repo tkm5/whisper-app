@@ -1,0 +1,14 @@
+# Ignore files directory
+audio_files/
+csv_files/
+text_files/
+
+# Common files to ignore
+*.log
+*.cache
+*.pyc
+__pycache__/
+*.git
+.dockerignore
+Dockerfile
+*.md
