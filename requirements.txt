@@ -1,2 +1,4 @@
 discordwebhook
 pandas
+whisper
+streamlit

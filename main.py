@@ -1,19 +1,17 @@
 import os
 
-import functions
+from functions import AudioTranscriber
 import discord_notification
 import settings
 
-OUTPUT_FILE_NAME = settings.OUTPUT_FILE_NAME
+AUDIO_FILE = 'test.mp3'
+audio_path = os.path.join(settings.AUDIO_DIR, AUDIO_FILE)
+OUTPUT_FILE_NAME = AUDIO_FILE.split(".")[0]  # Do not need file extension
 
-TEXT_DIR = settings.TEXT_DIR
-CSV_DIR = settings.CSV_DIR
-
-TEXT_PATH = os.path.join(TEXT_DIR, OUTPUT_FILE_NAME+".txt")
-CSV_PATH = os.path.join(CSV_DIR, OUTPUT_FILE_NAME+".csv")
 
 if __name__ == '__main__':
-    minutes_dict = functions.audio_to_text(model='large')
-    functions.write_to_text(TEXT_PATH, minutes_dict)
-    functions.export_csv(CSV_PATH, minutes_dict)
+    transcriber = AudioTranscriber(model_name=settings.MODEL, lang=settings.LANG)
+    minutes_dict = transcriber.audio_to_text(audio_path)
+    transcriber.write_to_text("output.txt", minutes_dict)
+    transcriber.export_csv("output.csv", minutes_dict)
     discord_notification.post_notice(message=f'{OUTPUT_FILE_NAME} minutes is DONE!')

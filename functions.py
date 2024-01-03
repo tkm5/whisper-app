@@ -1,101 +1,98 @@
 import os
-
 import whisper
 import pandas as pd
 
 import settings
 
-LANG = settings.LANG
 
-AUDIO_DIR = settings.AUDIO_DIR
-AUDIO_FILE = settings.AUDIO_FILE
-AUDIO_PATH = os.path.join(AUDIO_DIR, AUDIO_FILE)
+class AudioTranscriber:
+    """A class for transcribing audio files to text.
 
-
-def elapsed_time_str(seconds: float) -> str:
+    Attributes:
+        model (whisper.Model): An instance of the Whisper model.
+        lang (str): Language to use for transcription.
     """
-    Convert seconds to a formatted time string (HH:MM:SS).
 
-    Args:
-        seconds (float): Time in seconds.
+    def __init__(self, model_name: str, lang: str):
+        """Initializes the AudioTranscriber class with a specific Whisper model and language.
 
-    Returns:
-        str: Formatted time string in the format HH:MM:SS.
-    """
-    seconds = int(seconds + 0.5)
-    h = seconds // 3600
-    m = (seconds - h * 3600) // 60
-    s = seconds - h * 3600 - m * 60
-    return f"{h:02}:{m:02}:{s:02}"
+        Args:
+            model_name (str): Name of the Whisper model to be used.
+            lang (str): Language to be used for transcription.
+        """
+        self.model = whisper.load_model(model_name)
+        self.lang = lang
 
+    @staticmethod
+    def elapsed_time_str(seconds: float) -> str:
+        """Converts elapsed time in seconds to a formatted string (hh:mm:ss).
 
-def audio_to_text(model: str) -> dict:
-    """
-    Convert audio files to text using the whisper model.
+        Args:
+            seconds (float): Elapsed time in seconds.
 
-    Args:
-        model (str): Path to the whisper model.
+        Returns:
+            str: Formatted time string in hh:mm:ss format.
+        """
+        seconds = int(seconds + 0.5)
+        h = seconds // 3600
+        m = (seconds - h * 3600) // 60
+        s = seconds - h * 3600 - m * 60
+        return f"{h:02}:{m:02}:{s:02}"
 
-    Returns:
-        dict: Dictionary containing the start time, end time, and text of each audio segment.
-    """
-    model = whisper.load_model(str(model))
-    result_dict = model.transcribe(audio=AUDIO_PATH,
-                                   verbose=True,
-                                   language=LANG)
-    minutes_dict = _generate_minutes_dict(result_dict['segments'])
-    minutes_dict['start_time'] = [elapsed_time_str(t) for t in minutes_dict['start_time']]
-    minutes_dict['end_time'] = [elapsed_time_str(t) for t in minutes_dict['end_time']]
-    return minutes_dict
+    @staticmethod
+    def _generate_minutes_dict(result: list) -> dict:
+        """Generates a dictionary with start times, end times, and transcribed text from the results.
 
+        Args:
+            result (list): List of transcription results.
 
-def _generate_minutes_dict(result: list) -> dict:
-    """
-    Generate dictionary of minutes from the transcribed result.
+        Returns:
+            dict: Dictionary containing start times, end times, and speech text.
+        """
+        return {
+            'start_time': [segment['start'] for segment in result],
+            'end_time': [segment['end'] for segment in result],
+            'speach_text': [segment['text'] for segment in result]
+        }
 
-    Args:
-        result (list): List of transcribed segments.
+    @staticmethod
+    def write_to_text(text_path: str, minutes_dict: dict):
+        """Writes the transcription results to a text file.
 
-    Returns:
-        dict: Dictionary containing the start time, end time, and text of each audio segment.
-    """
-    start_times_list = []
-    end_times_list = []
-    texts_list = []
+        Args:
+            text_path (str): Path to the output text file.
+            minutes_dict (dict): Dictionary of transcription results per minute.
+        """
+        with open(text_path, "w") as f:
+            for i in range(len(minutes_dict["speach_text"])):
+                print(
+                    f'[{minutes_dict["start_time"][i]}] --> [{minutes_dict["end_time"][i]}] | {minutes_dict["speach_text"][i]}',
+                    file=f)
 
-    for segment in result:
-        start_times_list.append(segment['start'])
-        end_times_list.append(segment['end'])
-        texts_list.append(segment['text'])
+    @staticmethod
+    def export_csv(output_path: str, minutes_dict: dict):
+        """Exports the transcription results to a CSV file.
 
-    return {
-        'start_time': start_times_list,
-        'end_time': end_times_list,
-        'speach_text': texts_list
-    }
+        Args:
+            output_path (str): Path to the output CSV file.
+            minutes_dict (dict): Dictionary of transcription results per minute.
+        """
+        df = pd.DataFrame(minutes_dict)
+        df.to_csv(output_path)
 
+    def audio_to_text(self, audio_path: str) -> dict:
+        """Transcribes an audio file to text.
 
-def write_to_text(text_path: str, minutes_dict: dict):
-    """
-    Write transcribed minutes to a text file.
+        Args:
+            audio_path (str): Path to the audio file to be transcribed.
 
-    Args:
-        text_path (str): Path to the output text file.
-        minutes_dict (dict): Dictionary containing the transcribed minutes.
-    """
-    with open(text_path, "w") as f:
-        for i in range(len(minutes_dict["speach_text"])):
-            print(f'[{minutes_dict["start_time"][i]}] --> [{minutes_dict["end_time"][i]}] | {minutes_dict["speach_text"][i]}',
-                  file=f)
-
-
-def export_csv(output_path: str, minutes_dict: dict):
-    """
-    Export transcribed minutes to a CSV file.
-
-    Args:
-        output_path (str): Path to the output CSV file.
-        minutes_dict (dict): Dictionary containing the transcribed minutes.
-    """
-    df = pd.DataFrame(minutes_dict)
-    df.to_csv(output_path)
+        Returns:
+            dict: Dictionary containing the transcription results.
+        """
+        audio = whisper.load_audio(audio_path)
+        audio = whisper.pad_or_trim(audio)
+        result_dict = self.model.transcribe(audio=audio, verbose=True, language=self.lang)
+        minutes_dict = self._generate_minutes_dict(result_dict['segments'])
+        minutes_dict['start_time'] = [self.elapsed_time_str(t) for t in minutes_dict['start_time']]
+        minutes_dict['end_time'] = [self.elapsed_time_str(t) for t in minutes_dict['end_time']]
+        return minutes_dict
