@@ -1,8 +1,8 @@
-import os
+from openai import OpenAI
 import whisper
 import pandas as pd
 
-import settings
+import secret
 
 
 class AudioTranscriber:
@@ -13,15 +13,17 @@ class AudioTranscriber:
         lang (str): Language to use for transcription.
     """
 
-    def __init__(self, model_name: str, lang: str):
+    def __init__(self, model_name: str, lang: str, use_api: bool = True):
         """Initializes the AudioTranscriber class with a specific Whisper model and language.
 
         Args:
             model_name (str): Name of the Whisper model to be used.
             lang (str): Language to be used for transcription.
         """
+        self.client = OpenAI(api_key=secret.openai_api_key)
         self.model = whisper.load_model(model_name)
         self.lang = lang
+        self.use_api = use_api
 
     @staticmethod
     def elapsed_time_str(seconds: float) -> str:
@@ -40,7 +42,7 @@ class AudioTranscriber:
         return f"{h:02}:{m:02}:{s:02}"
 
     @staticmethod
-    def _generate_minutes_dict(result: list) -> dict:
+    def generate_minutes_dict(result: list) -> dict:
         """Generates a dictionary with start times, end times, and transcribed text from the results.
 
         Args:
@@ -89,10 +91,18 @@ class AudioTranscriber:
         Returns:
             dict: Dictionary containing the transcription results.
         """
-        audio = whisper.load_audio(audio_path)
-        audio = whisper.pad_or_trim(audio)
-        result_dict = self.model.transcribe(audio=audio, verbose=True, language=self.lang)
-        minutes_dict = self._generate_minutes_dict(result_dict['segments'])
+        if self.use_api:
+            audio = open(audio_path, "rb")
+            result_dict = self.client.audio.transcriptions.create(
+                model="whisper-1",
+                file=audio,
+                response_format="verbose_json",
+                language="ja"
+            )
+            result_dict = dict(result_dict)
+        else:
+            result_dict = self.model.transcribe(audio=audio_path, verbose=True, language=self.lang)
+        minutes_dict = self.generate_minutes_dict(result_dict['segments'])
         minutes_dict['start_time'] = [self.elapsed_time_str(t) for t in minutes_dict['start_time']]
         minutes_dict['end_time'] = [self.elapsed_time_str(t) for t in minutes_dict['end_time']]
         return minutes_dict
