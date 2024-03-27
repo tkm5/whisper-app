@@ -12,6 +12,7 @@ audio/
 *.mp3
 
 #text files
+/output
 *.txt
 !requirements.txt
 *.csv

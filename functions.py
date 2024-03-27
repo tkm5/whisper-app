@@ -23,7 +23,8 @@ class AudioTranscriber:
         self.client = OpenAI(api_key=secret.openai_api_key)
         self.model = whisper.load_model(model_name)
         self.lang = lang
-        self.use_api = use_api
+        if use_api:
+            self.use_api = use_api
 
     @staticmethod
     def elapsed_time_str(seconds: float) -> str:
@@ -68,7 +69,9 @@ class AudioTranscriber:
         with open(text_path, "w") as f:
             for i in range(len(minutes_dict["speach_text"])):
                 print(
-                    f'[{minutes_dict["start_time"][i]}] --> [{minutes_dict["end_time"][i]}] | {minutes_dict["speach_text"][i]}',
+                    f'[{minutes_dict["start_time"][i]}] --> '
+                    f'[{minutes_dict["end_time"][i]}] | '
+                    f'{minutes_dict["speach_text"][i]}',
                     file=f)
 
     @staticmethod
@@ -97,7 +100,8 @@ class AudioTranscriber:
                 model="whisper-1",
                 file=audio,
                 response_format="verbose_json",
-                language="ja"
+                language="ja",
+                prompt="",
             )
             result_dict = dict(result_dict)
         else:
